@@ -36,6 +36,13 @@ try:
         if key2.key_info:
             have_key2 = True
     except: pass
+
+    try:
+        key3 = jwk.Key(client, 'alias/test-sign-key-p256')
+        if key3.key_info:
+            have_key3 = True
+    except: pass
+
 except:
     pass
 
@@ -61,7 +68,7 @@ class TestSigKey(unittest.TestCase):
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
         jwtoken = jwcrypto.jws.JWS()
         jwtoken.deserialize(token)
-        jwtoken.verify(jwkey)
+        jwtoken.verify(jwkey, 'RS256')
 
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
@@ -79,9 +86,79 @@ class TestSigKey(unittest.TestCase):
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
         jwtoken = jwcrypto.jws.JWS()
         jwtoken.deserialize(token)
-        jwtoken.verify(jwkey)
+        jwtoken.verify(jwkey, 'RS256')
 
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    def test_sign_rs384(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'RS384').serialize(compact=True)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'RS384')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    def test_sign_rs512(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'RS512').serialize(compact=True)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'RS512')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    def test_keyspec(self):
+        self.assertEqual(self.key.keyspec, 'RSA_2048')
+
+    def test_sign_ps256(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS256').serialize(compact=True)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'PS256')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    def test_sign_ps384(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS384').serialize(compact=True)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'PS384')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    def test_sign_ps512(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS512').serialize(compact=True)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'PS512')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    @unittest.skip("DER to Jose signature conversion not implemented")
+    def test_sign_es256(self):
+        public_key = self.key.public_key_pem
+
+        with self.assertRaises(jwk.JWKError):
+            token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=True)
 
 
 @unittest.skipIf(not have_key2, 'KMS encryption key not available for test')
@@ -89,3 +166,59 @@ class TestEncKey(unittest.TestCase):
     def test_use(self):
         key = jwk.Key(client, 'alias/test-encrypt-key')
         self.assertEqual(key.use, 'enc')
+
+
+@unittest.skipIf(not have_key3, 'KMS P-256 signature key not available for test')
+class TestSigKeyP256(unittest.TestCase):
+    def setUp(self):
+        self.key = jwk.Key(client, 'alias/test-sign-key-p256')
+
+    def test_public_key(self):
+        pem = self.key.public_key_pem
+        self.assertIn(b'BEGIN PUBLIC KEY', pem)
+
+    def test_use(self):
+        self.assertEqual(self.key.use, 'sig')
+
+    @unittest.skip("DER to Jose signature conversion not implemented")
+    def test_sign_compact(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=True)
+        self.assertEqual(token.count('.'), 2)
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'ES256')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    @unittest.skip("DER to Jose signature conversion not implemented")
+    def test_sign_long_form(self):
+        public_key = self.key.public_key_pem
+
+        token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=False)
+
+        dict_token = json.loads(token)
+        self.assertIn('payload', dict_token)
+        self.assertIn('signatures', dict_token)
+        self.assertIn('protected', dict_token['signatures'][0])
+        self.assertIn('signature', dict_token['signatures'][0])
+
+        jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
+        jwtoken = jwcrypto.jws.JWS()
+        jwtoken.deserialize(token)
+        jwtoken.verify(jwkey, 'ES256')
+
+        self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
+
+    @unittest.skip("DER to Jose signature conversion not implemented")
+    def test_sign_es512(self):
+        public_key = self.key.public_key_pem
+
+        with self.assertRaises(jwk.JWKError):
+            token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES512').serialize(compact=True)
+
+    def test_keyspec(self):
+        self.assertEqual(self.key.keyspec, 'ECC_NIST_P256')

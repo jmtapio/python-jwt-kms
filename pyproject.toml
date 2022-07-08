@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "jwt-kms"
-version = "0.0.0"
+version = "0.1.0"
 description = "Library to offload some JWT crypto operations to KMS"
 authors = ["Juha-Matti Tapio <jmtapio@verkkotelakka.net>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-cryptography = "^37.0.3"
+cryptography = "^37.0.4"
 
 [tool.poetry.dev-dependencies]
 jwcrypto = "^1.3.1"

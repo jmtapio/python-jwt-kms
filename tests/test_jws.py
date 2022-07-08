@@ -25,7 +25,8 @@ class JWSTests(unittest.TestCase):
             'RSASSA_PKCS1_V1_5_SHA_256',
             'RSASSA_PKCS1_V1_5_SHA_384',
             'RSASSA_PKCS1_V1_5_SHA_512',
-            ]
+            ],
+        CustomerMasterKeySpec = 'RSA_2048',
         )
 
     def test_jws_sign(self):
@@ -38,7 +39,7 @@ class JWSTests(unittest.TestCase):
 
         self.assertEqual(
             compact,
-            'eyJ0eXAiOiAiSldTIiwgImFsZyI6ICJSUzI1NiJ9.eyJmb28iOiAiYmF6In0.Zm9vc2lnbmF0dXJl'
+            'eyJ0eXAiOiAiSldTIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiLTBFMVBsQTB3eHZyYlo3ejhKY1B6SkVPWldvSGJPajhyQllLUFBBOHJnTSJ9.eyJmb28iOiAiYmF6In0.Zm9vc2lnbmF0dXJl'
         )
 
         client.get_public_key.assert_called()

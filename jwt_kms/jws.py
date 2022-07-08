@@ -11,15 +11,18 @@ class JWS:
 
     def add_signature(self, key, alg='RS256', protected=None, header=None):
         if key.use != 'sig':
-            raise ValueError('The key is not for signing')
+            raise jwk.JWKError('The key is not for signing')
 
         if header is not None:
-            raise NotImplemented('Unprotected header not implemented')
+            raise NotImplementedError('Unprotected header not implemented')
 
         try:
             aws_alg = jwa.jwa2aws[alg]
         except KeyError:
-            raise ValueError('Algorithm {} not possible'.format(alg))
+            raise jwk.JWKError('Algorithm {} not possible'.format(alg))
+
+        if alg in ('ES256', 'ES385', 'ES512'):
+            raise NotImplementedError('DER to Jose signature conversion not yet implemented')
 
         if protected is None:
             protected = dict()
@@ -30,7 +33,7 @@ class JWS:
         protected_header = dict(
             typ='JWS',
             alg=alg,
-            # kid=,
+            kid=key.public_key_jwk['kid'],
             )
         protected_header.update(protected)
         protected_header = json.dumps(protected_header).encode('utf-8')
@@ -56,9 +59,9 @@ class JWS:
 
         if compact:
             if len(self.signatures) > 1:
-                raise ValueError('Too many signatures for compact JWT')
+                raise jwk.JWKError('Too many signatures for compact JWT')
             if not self.signatures:
-                raise ValueError('Not signed, can\'t serialize JWT')
+                raise jwk.JWKError('Not signed, can\'t serialize JWT')
             return '{}.{}.{}'.format(
                 self.signatures[0]['protected'],
                 payload,
@@ -74,5 +77,4 @@ class JWS:
 
     @classmethod
     def from_jose_token(self):
-        raise NotImplemented()
-
+        raise NotImplementedError()

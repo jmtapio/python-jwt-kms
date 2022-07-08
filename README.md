@@ -7,6 +7,8 @@ making it next to impossible to make copies of them. This library aims to
 provide a simple interface to use KMS keys to sign payloads into JWS tokens 
 and/or to encrypt payloads into JWE tokens.
 
+Signing with RSA keys is currently supported.
+
 ## Keys
 
 ```
@@ -29,10 +31,9 @@ payload = {
    'more_something': 'abc'
 }
 
-token = jws.JWS(payload).add_signature(key).serialize(compact=True)  # or compact=False
+token = jws.JWS(payload).add_signature(key, 'RS256').serialize(compact=True)  # or compact=False
 ```
 
 ## Encrypting
 
 TODO.
-
