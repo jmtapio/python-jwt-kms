@@ -7,7 +7,7 @@ making it next to impossible to make copies of them. This library aims to
 provide a simple interface to use KMS keys to sign payloads into JWS tokens 
 and/or to encrypt payloads into JWE tokens.
 
-Signing with RSA keys is currently supported.
+Signing with RSA and EC keys is currently supported.
 
 ## Keys
 

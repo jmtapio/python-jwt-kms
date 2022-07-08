@@ -5,8 +5,6 @@ import hashlib
 import json
 import math
 
-from . import jwa
-
 
 class JWKError(Exception):
     pass

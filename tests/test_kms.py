@@ -14,7 +14,8 @@ The tests needs two KMS keys:
 
 import boto3
 import json
-import jwcrypto.jwk, jwcrypto.jws
+import jwcrypto.jwk
+import jwcrypto.jws
 
 from jwt_kms import jwk, jws
 
@@ -60,8 +61,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(self.key.use, 'sig')
 
     def test_sign_compact(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key).serialize(compact=True)
         self.assertEqual(token.count('.'), 2)
 
@@ -73,8 +72,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
     def test_sign_long_form(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key).serialize(compact=False)
 
         dict_token = json.loads(token)
@@ -91,8 +88,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
     def test_sign_rs384(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'RS384').serialize(compact=True)
 
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
@@ -103,8 +98,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
     def test_sign_rs512(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'RS512').serialize(compact=True)
 
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
@@ -118,8 +111,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(self.key.keyspec, 'RSA_2048')
 
     def test_sign_ps256(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS256').serialize(compact=True)
 
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
@@ -130,8 +121,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
     def test_sign_ps384(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS384').serialize(compact=True)
 
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
@@ -142,8 +131,6 @@ class TestSigKey(unittest.TestCase):
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
     def test_sign_ps512(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'PS512').serialize(compact=True)
 
         jwkey = jwcrypto.jwk.JWK.from_pem(self.key.public_key_pem)
@@ -153,12 +140,9 @@ class TestSigKey(unittest.TestCase):
 
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
-    @unittest.skip("DER to Jose signature conversion not implemented")
     def test_sign_es256(self):
-        public_key = self.key.public_key_pem
-
         with self.assertRaises(jwk.JWKError):
-            token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=True)
+            jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=True)
 
 
 @unittest.skipIf(not have_key2, 'KMS encryption key not available for test')
@@ -180,10 +164,7 @@ class TestSigKeyP256(unittest.TestCase):
     def test_use(self):
         self.assertEqual(self.key.use, 'sig')
 
-    @unittest.skip("DER to Jose signature conversion not implemented")
     def test_sign_compact(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=True)
         self.assertEqual(token.count('.'), 2)
 
@@ -194,10 +175,7 @@ class TestSigKeyP256(unittest.TestCase):
 
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
-    @unittest.skip("DER to Jose signature conversion not implemented")
     def test_sign_long_form(self):
-        public_key = self.key.public_key_pem
-
         token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES256').serialize(compact=False)
 
         dict_token = json.loads(token)
@@ -213,12 +191,9 @@ class TestSigKeyP256(unittest.TestCase):
 
         self.assertEqual(jwtoken.payload, b'{"foo": "bar"}')
 
-    @unittest.skip("DER to Jose signature conversion not implemented")
     def test_sign_es512(self):
-        public_key = self.key.public_key_pem
-
         with self.assertRaises(jwk.JWKError):
-            token = jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES512').serialize(compact=True)
+            jws.JWS({'foo': 'bar'}).add_signature(self.key, 'ES512').serialize(compact=True)
 
     def test_keyspec(self):
         self.assertEqual(self.key.keyspec, 'ECC_NIST_P256')

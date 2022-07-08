@@ -1,7 +1,7 @@
 import unittest
 import unittest.mock
 import base64
-from jwt_kms import jwa, jwk, jws
+from jwt_kms import jwk
 
 
 pubkey = base64.b64decode(

@@ -1,5 +1,6 @@
 import base64
 import json
+from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 
 from . import jwa, jwk
 
@@ -20,9 +21,6 @@ class JWS:
             aws_alg = jwa.jwa2aws[alg]
         except KeyError:
             raise jwk.JWKError('Algorithm {} not possible'.format(alg))
-
-        if alg in ('ES256', 'ES385', 'ES512'):
-            raise NotImplementedError('DER to Jose signature conversion not yet implemented')
 
         if protected is None:
             protected = dict()
@@ -45,6 +43,16 @@ class JWS:
         ).digest()
 
         signature = key.sign_digest(signing_input, aws_alg)
+
+        if alg in ('ES256', 'ES384', 'ES512'):
+            # Convert DER format signature to R|S
+            octets = {
+                'ES256': 32,
+                'ES384': 48,
+                'ES512': 66
+                }[alg]
+            r, s = decode_dss_signature(signature)
+            signature = r.to_bytes(octets, 'big') + s.to_bytes(octets, 'big')
 
         self.signatures.append(
             dict(
