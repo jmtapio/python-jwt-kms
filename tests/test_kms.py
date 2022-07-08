@@ -20,7 +20,7 @@ from jwt_kms import jwk, jws
 
 
 # Check if we have the environment set up
-have_key1, have_key2 = False, False
+have_key1, have_key2, have_key3 = False, False, False
 
 try:
     client = boto3.client('kms')
