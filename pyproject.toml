@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Library to offload some JWT crypto operations to KMS"
 authors = ["Juha-Matti Tapio <jmtapio@verkkotelakka.net>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/jmtapio/python-jwt-kms"
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
