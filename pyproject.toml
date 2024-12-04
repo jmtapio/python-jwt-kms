@@ -9,7 +9,7 @@ repository = "https://github.com/jmtapio/python-jwt-kms"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.9.2"
 cryptography = ">=44.0.0"
 
 [tool.poetry.dev-dependencies]
